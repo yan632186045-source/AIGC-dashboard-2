@@ -1058,10 +1058,16 @@ function aggMonthly(rows){
   var a={};
   rows.forEach(function(r){
     var mo=AR.dates[r[0]].slice(0,7);
-    if(!a[mo]) a[mo]={mo:mo,lbl:(+mo.slice(5))+'月',uids:new Set(),no:0,ib:0,ac:0,ld:0,cm:0};
-    a[mo].uids.add(r[1]); a[mo].no+=r[2]; a[mo].ib+=r[3]; a[mo].ac+=r[4]; a[mo].ld+=r[5]; a[mo].cm+=r[6];
+    if(!a[mo]) a[mo]={mo:mo,lbl:(+mo.slice(5))+'月',uidNo:{},no:0,ib:0,ac:0,ld:0,cm:0};
+    a[mo].uidNo[r[1]]=(a[mo].uidNo[r[1]]||0)+r[2];
+    a[mo].no+=r[2]; a[mo].ib+=r[3]; a[mo].ac+=r[4]; a[mo].ld+=r[5]; a[mo].cm+=r[6];
   });
-  var out=Object.values(a).map(function(m){return Object.assign({},m,{cnt:m.uids.size});}).sort(function(x,y){return x.mo.localeCompare(y.mo);});
+  // 账号数口径：当月有发布（发布>0）的账号；仅被动进线不计
+  var out=Object.values(a).map(function(m){
+    var cnt=0;
+    Object.keys(m.uidNo).forEach(function(k){if(m.uidNo[k]>0)cnt++;});
+    var o=Object.assign({},m,{cnt:cnt}); delete o.uidNo; return o;
+  }).sort(function(x,y){return x.mo.localeCompare(y.mo);});
   // 起止不完整的月份加标注
   if(out.length){
     var d0=AR.dates[0]||'', d1=AR.dates[AR.dates.length-1]||'';
@@ -1346,7 +1352,7 @@ function rAigcTrend(){
     var d=(cur-prev)/prev*100;
     return ' <span class="'+(d>=0?'d-up':'d-dn')+'" style="font-size:10px">'+(d>=0?'▲':'▼')+Math.abs(d).toFixed(0)+'%</span>';
   };
-  h+='<div style="font-size:12px;font-weight:700;margin:16px 0 6px;color:var(--txt)">各月数据汇总 <span style="font-weight:400;font-size:11px;color:var(--muted)">（▲▼为环比上月；末月未走完时环比仅供参考）</span></div>';
+  h+='<div style="font-size:12px;font-weight:700;margin:16px 0 6px;color:var(--txt)">各月数据汇总 <span style="font-weight:400;font-size:11px;color:var(--muted)">（账号数=当月有发布的账号，仅被动进线不计；▲▼为环比上月；末月未走完时环比仅供参考）</span></div>';
   h+='<div class="trend-chart-box"><div id="trendMoChartSvg"></div></div>';
   h+='<div class="tw"><table class="dt"><thead><tr><th>月份</th><th>账号数</th><th>发布量</th><th>私信进线</th><th>私信开口⭐</th><th>开口率</th><th>意向评论</th><th>留资⭐</th><th>留资率</th><th class="sep-l">号均留资</th></tr></thead><tbody>';
   mos.forEach(function(m,i){
