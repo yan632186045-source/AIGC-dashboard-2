@@ -126,6 +126,7 @@ table.dt{width:100%;border-collapse:collapse;font-size:12px;}
 table.dt thead tr{background:#f8fafc;}
 table.dt th{padding:8px 9px;text-align:left;font-weight:700;font-size:11px;color:var(--muted);border-bottom:2px solid var(--bdr);white-space:nowrap;position:sticky;top:0;background:#f8fafc;z-index:3;}
 th.th-s{cursor:pointer;}th.th-s:hover{color:var(--blue);}th.th-on{color:var(--blue);}
+.sep-l{border-left:2px solid var(--bdr)!important;}
 .brief{background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:12px;line-height:2;color:#0c4a6e;}
 .brief-ttl{font-weight:800;font-size:13px;margin-bottom:2px;}
 table.dt td{padding:7px 9px;border-bottom:1px solid #f1f5f9;vertical-align:middle;}
@@ -1053,6 +1054,26 @@ function aggWeekly(rows){
   return Object.values(a).map(function(w){return Object.assign({},w,{cnt:w.uids.size});}).sort(function(a,b){return a.wk.localeCompare(b.wk);});
 }
 
+function aggMonthly(rows){
+  var a={};
+  rows.forEach(function(r){
+    var mo=AR.dates[r[0]].slice(0,7);
+    if(!a[mo]) a[mo]={mo:mo,lbl:(+mo.slice(5))+'月',uids:new Set(),no:0,ib:0,ac:0,ld:0,cm:0};
+    a[mo].uids.add(r[1]); a[mo].no+=r[2]; a[mo].ib+=r[3]; a[mo].ac+=r[4]; a[mo].ld+=r[5]; a[mo].cm+=r[6];
+  });
+  var out=Object.values(a).map(function(m){return Object.assign({},m,{cnt:m.uids.size});}).sort(function(x,y){return x.mo.localeCompare(y.mo);});
+  // 起止不完整的月份加标注
+  if(out.length){
+    var d0=AR.dates[0]||'', d1=AR.dates[AR.dates.length-1]||'';
+    if(d0.slice(0,7)===out[0].mo&&d0.slice(8)!=='01') out[0].lbl+='（'+shortD(d0)+'起）';
+    var lastMo=out[out.length-1];
+    var y=+lastMo.mo.slice(0,4), m=+lastMo.mo.slice(5);
+    var lastDay=new Date(y,m,0).getDate();
+    if(d1.slice(0,7)===lastMo.mo&&+d1.slice(8)!==lastDay) lastMo.lbl+='（至'+shortD(d1)+'）';
+  }
+  return out;
+}
+
 function totals(rows){
   var t={no:0,ib:0,ac:0,ld:0,cm:0,uids:new Set()};
   rows.forEach(function(r){t.no+=r[2];t.ib+=r[3];t.ac+=r[4];t.ld+=r[5];t.cm+=r[6];t.uids.add(r[1]);});
@@ -1307,16 +1328,42 @@ function rAigcTrend(){
   h+='<span><span style="display:inline-block;width:12px;height:10px;background:#f97316;opacity:.35;vertical-align:middle;margin-right:4px;border-radius:2px"></span>笔记发布量（右轴·橙色刻度）</span>';
   h+='<span class="dim">（发布量与转化量级差异大，分轴展示；悬停数据点可看数值）</span>';
   h+='</div>';
-  // table
-  h+='<div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--txt)">各周数据汇总</div>';
-  h+='<div class="tw"><table class="dt"><thead><tr><th>周期</th><th>账号数</th><th>发布量</th><th>私信进线</th><th>私信开口⭐</th><th>意向评论</th><th>留资⭐</th><th>留资转化率</th></tr></thead><tbody>';
+  // 周表（含号均列：÷当周活跃账号数）
+  var avg=function(v,c){return c>0?(v/c).toFixed(1):'—';};
+  h+='<div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--txt)">各周数据汇总 <span style="font-weight:400;font-size:11px;color:var(--muted)">（右侧五列为号均值＝该周指标 ÷ 当周活跃账号数）</span></div>';
+  h+='<div class="tw"><table class="dt"><thead><tr><th>周期</th><th>账号数</th><th>发布量</th><th>私信进线</th><th>私信开口⭐</th><th>意向评论</th><th>留资⭐</th><th>留资转化率</th>'+
+     '<th class="sep-l">号均发布</th><th>号均进线</th><th>号均开口</th><th>号均评论</th><th>号均留资</th></tr></thead><tbody>';
   wks.forEach(function(w){
     var conv=w.ac>0?(w.ld/w.ac*100).toFixed(1)+'%':'—';
-    h+='<tr><td><strong>'+w.lbl+'</strong></td><td class="dim">'+w.cnt+'</td><td>'+w.no+'</td><td class="hi">'+fN(w.ib)+'</td><td><strong class="hi">'+fN(w.ac)+'</strong></td><td class="dim">'+w.cm+'</td><td><strong class="hig">'+fN(w.ld)+'</strong></td><td class="dim">'+conv+'</td></tr>';
+    h+='<tr><td><strong>'+w.lbl+'</strong></td><td class="dim">'+w.cnt+'</td><td>'+w.no+'</td><td class="hi">'+fN(w.ib)+'</td><td><strong class="hi">'+fN(w.ac)+'</strong></td><td class="dim">'+w.cm+'</td><td><strong class="hig">'+fN(w.ld)+'</strong></td><td class="dim">'+conv+'</td>'+
+      '<td class="sep-l dim">'+avg(w.no,w.cnt)+'</td><td class="dim">'+avg(w.ib,w.cnt)+'</td><td><strong>'+avg(w.ac,w.cnt)+'</strong></td><td class="dim">'+avg(w.cm,w.cnt)+'</td><td><strong class="hig">'+avg(w.ld,w.cnt)+'</strong></td></tr>';
+  });
+  h+='</tbody></table></div>';
+  // 月度汇总（含环比）
+  var mos=aggMonthly(AR.rows);
+  var mp=function(cur,prev){
+    if(prev==null||prev===0) return '';
+    var d=(cur-prev)/prev*100;
+    return ' <span class="'+(d>=0?'d-up':'d-dn')+'" style="font-size:10px">'+(d>=0?'▲':'▼')+Math.abs(d).toFixed(0)+'%</span>';
+  };
+  h+='<div style="font-size:12px;font-weight:700;margin:16px 0 6px;color:var(--txt)">各月数据汇总 <span style="font-weight:400;font-size:11px;color:var(--muted)">（▲▼为环比上月；末月未走完时环比仅供参考）</span></div>';
+  h+='<div class="trend-chart-box"><div id="trendMoChartSvg"></div></div>';
+  h+='<div class="tw"><table class="dt"><thead><tr><th>月份</th><th>账号数</th><th>发布量</th><th>私信进线</th><th>私信开口⭐</th><th>开口率</th><th>意向评论</th><th>留资⭐</th><th>留资率</th><th class="sep-l">号均留资</th></tr></thead><tbody>';
+  mos.forEach(function(m,i){
+    var pv=i>0?mos[i-1]:null;
+    h+='<tr><td><strong>'+m.lbl+'</strong></td><td class="dim">'+m.cnt+'</td>'+
+      '<td>'+fN(m.no)+(pv?mp(m.no,pv.no):'')+'</td>'+
+      '<td class="hi">'+fN(m.ib)+(pv?mp(m.ib,pv.ib):'')+'</td>'+
+      '<td><strong class="hi">'+fN(m.ac)+'</strong>'+(pv?mp(m.ac,pv.ac):'')+'</td>'+
+      '<td class="dim">'+pct(m.ac,m.ib)+'</td>'+
+      '<td class="dim">'+fN(m.cm)+(pv?mp(m.cm,pv.cm):'')+'</td>'+
+      '<td><strong class="hig">'+fN(m.ld)+'</strong>'+(pv?mp(m.ld,pv.ld):'')+'</td>'+
+      '<td class="dim">'+pct(m.ld,m.ac)+'</td>'+
+      '<td class="sep-l"><strong class="hig">'+avg(m.ld,m.cnt)+'</strong></td></tr>';
   });
   h+='</tbody></table></div>';
   el.innerHTML=h;
-  // draw chart
+  // draw charts
   var chartEl=document.getElementById('trendChartSvg');
   if(chartEl) svgCombo(chartEl,wks,
     {data:wks.map(function(w){return w.no;}),color:'#f97316',name:'笔记发布量'},
@@ -1324,6 +1371,14 @@ function rAigcTrend(){
       {data:wks.map(function(w){return w.ib;}),color:'#3b82f6',w:1.5,name:'私信进线'},
       {data:wks.map(function(w){return w.ac;}),color:'#4f46e5',w:2.5,name:'私信开口'},
       {data:wks.map(function(w){return w.ld;}),color:'#16a34a',w:2,name:'留资量'}
+    ]);
+  var moEl=document.getElementById('trendMoChartSvg');
+  if(moEl&&mos.length>1) svgCombo(moEl,mos,
+    {data:mos.map(function(m){return m.no;}),color:'#f97316',name:'笔记发布量'},
+    [
+      {data:mos.map(function(m){return m.ib;}),color:'#3b82f6',w:1.5,name:'私信进线'},
+      {data:mos.map(function(m){return m.ac;}),color:'#4f46e5',w:2.5,name:'私信开口'},
+      {data:mos.map(function(m){return m.ld;}),color:'#16a34a',w:2,name:'留资量'}
     ]);
 }
 
