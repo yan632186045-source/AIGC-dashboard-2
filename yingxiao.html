@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AIGC营销号数据看板</title>
+<title>AIGC营销号7月数据看板</title>
 <style>
 :root{--blue:#1d4ed8;--indigo:#4f46e5;--green:#16a34a;--orange:#d97706;--red:#dc2626;--cyan:#0891b2;--purple:#7c3aed;--bg:#f1f5f9;--card:#fff;--bdr:#e2e8f0;--txt:#0f172a;--muted:#64748b;--lt:#f8fafc;}
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -158,7 +158,7 @@ table.dt tr:hover td{background:#f8fafc;}
 
 <div class="hdr">
   <div class="hdr-row">
-    <div class="hdr-title">📢 AIGC营销号数据看板</div>
+    <div class="hdr-title">📢 AIGC营销号7月数据看板</div>
     <span class="pill" id="pillAigc">📢 AIGC营销号·126个账号</span>
     </div>
 </div>
@@ -204,14 +204,7 @@ table.dt tr:hover td{background:#f8fafc;}
       <button class="ctrl-btn" onclick="applyCustom()">确认</button>
     </div>
     <span style="font-size:11px;color:var(--muted);margin-left:4px" id="aPeriodLbl">全周期 3.10–6.28</span>
-    <div style="margin-left:auto;display:flex;gap:6px;">
-      <button class="ctrl-btn" onclick="document.getElementById('aigcDailyUp').click()">📊 每日更新</button>
-      <button class="ctrl-btn" onclick="document.getElementById('dkUp').click()">📥 带看数据</button>
-      <button class="ctrl-btn" onclick="document.getElementById('cjUp').click()">📥 成交数据</button>
-      <input type="file" id="aigcDailyUp" accept=".csv" style="display:none" onchange="uploadAigcDaily(this.files[0])">
-      <input type="file" id="dkUp"   accept=".csv" style="display:none" onchange="uploadDk(this.files[0])">
-      <input type="file" id="cjUp"   accept=".csv" style="display:none" onchange="uploadCj(this.files[0])">
-    </div>
+    
   </div>
   <div class="a-stabs">
     <button class="astb on" data-asp="overview" onclick="SAP(this)">📊 整体概览</button>
@@ -287,10 +280,12 @@ function syncKpiAigc(rows){
   rows.forEach(function(r){t.no+=r[2];t.ib+=r[3];t.ac+=r[4];t.ld+=r[5];t.uids.add(r[1]);});
   var el;
   // 全周期显示在运营账号数（OPS 人工维护），选周期时显示当期活跃账号数
-  var isAll=(AM==='all');
-  el=document.getElementById('kAN');   if(el) el.textContent=isAll?OPS.aigc:t.uids.size;
-  el=document.getElementById('kANlbl');if(el) el.textContent=isAll?'在运营账号':'活跃账号';
-  el=document.getElementById('kANsub');if(el) el.textContent=isAll?('个 · 在册 '+AIGC_ALL.length):'个';
+  var _pub={};
+  rows.forEach(function(r){_pub[r[1]]=(_pub[r[1]]||0)+r[2];});
+  var _c=0;Object.keys(_pub).forEach(function(k){if(_pub[k]>0)_c++;});
+  el=document.getElementById('kAN');   if(el) el.textContent=_c;
+  el=document.getElementById('kANlbl');if(el) el.textContent='运营账号';
+  el=document.getElementById('kANsub');if(el) el.textContent='个 · 当月有发布';
   el=document.getElementById('kAInb'); if(el) el.textContent=fN(t.ib);
   el=document.getElementById('kAAct'); if(el) el.textContent=fN(t.ac);
   el=document.getElementById('kALed'); if(el) el.textContent=fN(t.ld);
@@ -903,9 +898,12 @@ function aggMonthly(rows){
 }
 
 function totals(rows){
-  var t={no:0,ib:0,ac:0,ld:0,cm:0,uids:new Set()};
-  rows.forEach(function(r){t.no+=r[2];t.ib+=r[3];t.ac+=r[4];t.ld+=r[5];t.cm+=r[6];t.uids.add(r[1]);});
-  t.cnt=t.uids.size; return t;
+  var t={no:0,ib:0,ac:0,ld:0,cm:0,uids:new Set()},pub={};
+  rows.forEach(function(r){t.no+=r[2];t.ib+=r[3];t.ac+=r[4];t.ld+=r[5];t.cm+=r[6];t.uids.add(r[1]);
+    pub[r[1]]=(pub[r[1]]||0)+r[2];});
+  var c=0;Object.keys(pub).forEach(function(k){if(pub[k]>0)c++;});
+  t.cnt=c;  // 口径：当月有发布的账号
+  return t;
 }
 
 function pct(a,b){return b>0?(a/b*100).toFixed(1)+'%':'—';}
@@ -1047,7 +1045,7 @@ function rAigcOverview(rows){
   var h='<div class="ov-grid">';
   // KPI cards
   h+='<div class="ov-kpi-row">';
-  h+=mkOKPI('活跃账号',t.cnt,AM==='all'?'个（在运营 '+OPS.aigc+' / 在册 '+AIGC_ALL.length+'）':'个','v-blue');
+  h+=mkOKPI('运营账号',t.cnt,'个 · 当月有发布','v-blue');
   h+=mkOKPI('发布量',fN(t.no),'篇','v-orange');
   h+=mkOKPI('私信进线',fN(t.ib),'人次','v-cyan');
   h+=mkOKPI('私信开口⭐',fN(t.ac),'开口率 '+i2o,'v-indigo');
@@ -2098,10 +2096,20 @@ function rJzAccts(rows){
 // ══ INIT ════════════════════════
 (function(){
   try{syncMetaLabels();}catch(e){}
-  try{initAigcPeriods();syncKpiAigc(AR.rows);renderAigc();}catch(e){}
   try{
-    setEl('pillAigc','📢 AIGC营销号·在运营'+OPS.aigc+'·在册'+AIGC_ALL.length);
-    setEl('opsNote','当前仍在运营中的营销号（每月有淘汰/新增），在运营数按运营名单人工维护，更新于 '+OPS.asOf);
+    initAigcPeriods();
+    var _mi=-1;
+    for(var _k=0;_k<AMonths.length;_k++){if(AMonths[_k].mo==='2026-07'){_mi=_k;break;}}
+    if(_mi>=0){AM='month';AMOI=_mi;syncPeriod();}
+    var _ct=document.querySelector('#pane-aigc .aigc-ctrl');
+    if(_ct) _ct.innerHTML='<span style="font-size:13px;font-weight:700">📅 统计周期：7月（%s）</span>'
+      .replace('%s',(APeriod.s||'').slice(5)+' ~ '+(APeriod.e||'').slice(5));
+    renderAigc();
+  }catch(e){}
+  try{
+    setEl('pillAigc','📢 7月·运营账号 '+(document.getElementById('kAN')||{}).textContent+' 个');
+    setEl('rangeNote','AIGC营销号 7月（'+(APeriod.s||'').slice(5).replace('-','.')+'–'+(APeriod.e||'').slice(5).replace('-','.')+'，日粒度汇总）');
+    setEl('opsNote','口径为当月有发布的账号；账号每月有淘汰与新增，名单更新于 '+OPS.asOf);
   }catch(e){}
 })();
 </script></body></html>
