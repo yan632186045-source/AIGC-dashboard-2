@@ -1336,7 +1336,8 @@ function rAigcAccts(rows){
   AR.uids.forEach(function(uid,i){
     if(!uid2[i]) return;
     var inf=AR.info[i]; if(!inf) return;
-    var u=Object.assign({},uid2[i],{nn:inf.nn,nm:inf.nm,ag:inf.ag,dc:inf.dc,st:inf.st,ac:inf.ac});
+    // 注意：info.ac 是账号的 AI 开关状态，不能覆盖 uid2[i].ac（开口数）——改名为 aiOn
+    var u=Object.assign({},uid2[i],{nn:inf.nn,nm:inf.nm,ag:inf.ag,dc:inf.dc,st:inf.st,aiOn:inf.ac});
     if(q&&(u.nn+u.nm+u.ag+u.dc+u.st).toLowerCase().indexOf(q.toLowerCase())<0) return;
     if(fd&&u.dc!==fd) return;
     out.push(u);
