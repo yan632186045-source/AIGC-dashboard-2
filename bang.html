@@ -95,6 +95,17 @@ h1{font-size:27px;font-weight:800;letter-spacing:-.02em;line-height:1.25;margin:
 .pill.hi{color:var(--good);border-color:color-mix(in srgb,var(--good) 32%,transparent);background:color-mix(in srgb,var(--good) 8%,transparent)}
 .pill.lo{color:var(--red-deep);border-color:color-mix(in srgb,var(--red) 30%,transparent);background:color-mix(in srgb,var(--red) 7%,transparent)}
 
+/* 本期观察 */
+.obs{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:4px 16px;box-shadow:var(--shadow)}
+.ob{padding:14px 0;border-top:1px solid var(--line)}
+.ob:first-child{border-top:none}
+.ob-t{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.1em;padding:2.5px 8px;
+  border-radius:5px;background:var(--blush);color:var(--red-deep);margin-bottom:7px}
+.ob-t[data-k="大盘"]{background:color-mix(in srgb,var(--cool) 12%,transparent);color:var(--cool)}
+.ob-t[data-k="待改善"]{background:color-mix(in srgb,var(--gold) 15%,transparent);color:var(--gold)}
+.ob-b{font-size:13px;color:var(--ink-2);line-height:1.78}
+.ob-b b{color:var(--ink);font-weight:700}
+
 /* 说明 */
 .note{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 15px;font-size:11.5px;color:var(--muted);line-height:1.85}
 .note b{color:var(--ink-2)}
@@ -218,6 +229,11 @@ h1{font-size:27px;font-weight:800;letter-spacing:-.02em;line-height:1.25;margin:
           <div class="pills"><span class="pill">发布 72</span><span class="pill hi">开口率 78%</span><span class="pill ">留资率 19%</span></div></div>
         <div class="ld"><div class="n num">10</div><div class="u">留资</div></div>
       </div></section>
+
+<section class="sec">
+  <div class="sec-hd"><span class="sec-t">本期观察</span><span class="sec-s">数据自动生成</span></div>
+  <div class="obs"><div class="ob"><span class="ob-t" data-k="大盘">大盘</span><div class="ob-b">本周留资 <b>85 组</b>，环比降 <b>15%</b>。进线 <b>715</b>（-<b>9%</b>）、开口 <b>330</b>（-<b>15%</b>），变化主要出在开口环节。开口率 <b>46%</b>，已连续几周走低（<b>55%</b>→<b>52%</b>→<b>49%</b>→<b>46%</b>），是当前最该盯的口子。</div></div><div class="ob"><span class="ob-t" data-k="榜单规律">榜单规律</span><div class="ob-b">上榜 <b>6</b> 人人均发布 <b>44 篇</b>，过门槛的 <b>82</b> 人是 <b>42 篇</b>——发布量几乎没差别。拉开差距的是后面两环：人均进线 <b>37</b> vs <b>17</b>（<b>2.2 倍</b>），留资率 <b>40%</b> vs <b>19%</b>（<b>2.2 倍</b>）。同样的发布量拿到两倍进线，说明差别在内容本身而不是勤奋程度。</div></div><div class="ob"><span class="ob-t" data-k="值得对标">值得对标</span><div class="ob-b">陈龙 用 <b>22 个</b>进线做出 <b>8 个</b>留资（留资率 <b>57%</b>）；肖剑锋 进线 <b>64</b> 是榜内最多的，留资 <b>6</b>、留资率只有 <b>25%</b>。两人发布量相近（<b>45 篇</b> / <b>45 篇</b>），差别在私信之后的承接——这两个人的话术值得放在一起对一遍。</div></div><div class="ob"><span class="ob-t" data-k="待改善">待改善</span><div class="ob-b">近四周里，<b>9</b> 人进线够多（合计 <b>362</b>）但开口率不到 <b>40%</b>，只聊开了 <b>59 个</b>；<b>2</b> 人开口过 <b>15</b> 却几乎留不下人，其中 徐倩 开口 <b>39 个</b>、留资 <b>0 个</b>。这几位不进公示榜，名单和诊断另附。</div></div></div>
+</section>
 
 <div class="note">
   <div class="note-t">怎么看这张榜</div>
