@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AIGC营销号7月数据看板</title>
+<title>AIGC营销号近4周数据看板</title>
 <style>
 :root{--blue:#1d4ed8;--indigo:#4f46e5;--green:#16a34a;--orange:#d97706;--red:#dc2626;--cyan:#0891b2;--purple:#7c3aed;--bg:#f1f5f9;--card:#fff;--bdr:#e2e8f0;--txt:#0f172a;--muted:#64748b;--lt:#f8fafc;}
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -158,7 +158,7 @@ table.dt tr:hover td{background:#f8fafc;}
 
 <div class="hdr">
   <div class="hdr-row">
-    <div class="hdr-title">📢 AIGC营销号7月数据看板</div>
+    <div class="hdr-title">📢 AIGC营销号近4周数据看板</div>
     <span class="pill" id="pillAigc">📢 AIGC营销号·126个账号</span>
     </div>
 </div>
@@ -2099,18 +2099,22 @@ function rJzAccts(rows){
   try{syncMetaLabels();}catch(e){}
   try{
     initAigcPeriods();
-    var _mi=-1;
-    for(var _k=0;_k<AMonths.length;_k++){if(AMonths[_k].mo==='2026-07'){_mi=_k;break;}}
-    if(_mi>=0){AM='month';AMOI=_mi;syncPeriod();}
-    var _ct=document.querySelector('#pane-aigc .aigc-ctrl');
-    if(_ct) _ct.innerHTML='<span style="font-size:13px;font-weight:700">📅 统计周期：7月（%s）</span>'
-      .replace('%s',(APeriod.s||'').slice(5)+' ~ '+(APeriod.e||'').slice(5));
+    AM='custom';ACS='2026-07-14';ACE='2026-08-12';syncPeriod();
+    APeriod.lbl='近4周';
+    var _pl=document.getElementById('aPeriodLbl'); if(_pl) _pl.textContent='近4周';
+    var _d1=document.getElementById('aDt1'),_d2=document.getElementById('aDt2');
+    if(_d1) _d1.value='2026-07-14'; if(_d2) _d2.value='2026-08-12';
+
+    document.querySelectorAll('.mtg[data-grp="aigc"]').forEach(function(b){b.classList.remove('on');});
+    var _btns=document.querySelectorAll('.mtg[data-grp="aigc"]');
+    if(_btns[2]) _btns[2].classList.add('on');
+    var _cs=document.getElementById('aCustom'); if(_cs) _cs.style.display='flex';
     renderAigc();
   }catch(e){}
   try{
-    setEl('pillAigc','📢 7月·运营账号 '+(document.getElementById('kAN')||{}).textContent+' 个');
-    setEl('rangeNote','AIGC营销号 7月（'+(APeriod.s||'').slice(5).replace('-','.')+'–'+(APeriod.e||'').slice(5).replace('-','.')+'，日粒度汇总）');
-    setEl('opsNote','口径为当月有发布的账号；账号每月有淘汰与新增，名单更新于 '+OPS.asOf);
+    setEl('pillAigc','📢 近4周·运营账号 '+(document.getElementById('kAN')||{}).textContent+' 个');
+    setEl('rangeNote','AIGC营销号 近4周（'+(APeriod.s||'').slice(5).replace('-','.')+'–'+(APeriod.e||'').slice(5).replace('-','.')+'，日粒度汇总）');
+    setEl('opsNote','口径为区间内有发布的账号；账号每月有淘汰与新增，名单更新于 '+OPS.asOf);
   }catch(e){}
 })();
 </script></body></html>
